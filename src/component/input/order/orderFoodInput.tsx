@@ -1,5 +1,4 @@
-import TOrderFoodInputProps from "@/types/component/input/orderFoodInputProps.type";
-import TOrderQuantityInputProps from "@/types/component/input/orderQuantityInputProps.type";
+import type TOrderFoodInputProps from "@/types/component/input/orderFoodInputProps.type";
 import React from "react";
 
 /**

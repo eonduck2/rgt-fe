@@ -1,4 +1,4 @@
-import TLabelContent from "@/types/shared/labelContent.type";
+import type TLabelContent from "@/types/shared/labelContent.type";
 
 /**
  * @eonduck2 24.10.29

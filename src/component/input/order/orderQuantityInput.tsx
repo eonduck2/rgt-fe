@@ -1,4 +1,4 @@
-import TOrderQuantityInputProps from "@/types/component/input/orderQuantityInputProps.type";
+import type TOrderQuantityInputProps from "@/types/component/input/orderQuantityInputProps.type";
 import React from "react";
 
 /**

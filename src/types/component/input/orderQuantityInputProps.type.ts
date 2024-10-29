@@ -1,5 +1,5 @@
-import TLabelContent from "@/types/shared/labelContent.type";
-import TQuantity from "@/types/shared/quantity.type";
+import type TLabelContent from "@/types/shared/labelContent.type";
+import type TQuantity from "@/types/shared/quantity.type";
 
 /**
  * @eonduck2 24.10.29
