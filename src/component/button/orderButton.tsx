@@ -1,3 +1,11 @@
+/**
+ * @eonduck2 24.10.29
+ * * 사용자의 주문을 제출하기위해 사용되는 버튼입니다.
+ * * 전체 너비에 푸른 배경을 가지고 있습니다.
+ * @param NoParam
+ * @returns { JSX.Element } 주문하기 버튼을 포함한 JSX 요소
+ */
+
 export default () => {
   return (
     <button
@@ -8,3 +16,4 @@ export default () => {
     </button>
   );
 };
+
