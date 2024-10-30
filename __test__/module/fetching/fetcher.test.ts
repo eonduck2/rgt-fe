@@ -23,7 +23,7 @@ describe("mocking 데이터를 활용한 fetcher 테스트 케이스 집합입�
 
     const response = await fetcher("test-url");
 
-    // response가 mock된 response(true)와 동일하고, thrower가 호출되지 않았는지 확인합니다.
+    // response가 mock된 response(true)와 동일하고, thrower가 호출되지 않았는지
     expect(response).toBe(mockResponse);
     expect(thrower).not.toHaveBeenCalled();
   });
@@ -32,7 +32,7 @@ describe("mocking 데이터를 활용한 fetcher 테스트 케이스 집합입�
     const mockResponse = { ok: false };
     (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
-    // fetcher 함수가 에러를 던지고, thrower가 실패 메시지와 함께 호출되었는지 확인합니다.
+    // fetcher 함수가 에러를 던지고, thrower가 실패 메시지와 함께 호출되었는지
     await expect(fetcher("test-url")).rejects.toThrow();
     expect(thrower).toHaveBeenCalledWith("test-url" + failedFetchMessage);
   });
