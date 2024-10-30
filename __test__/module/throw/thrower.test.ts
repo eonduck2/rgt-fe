@@ -1,4 +1,4 @@
-import thrower from "../../../../src/module/throw/thrower";
+import thrower from "@/module/throw/thrower";
 
 describe("thrower 함수의 에러 처리 테스트 케이스 집합입니다.", () => {
   it("주어진 메시지와 함께 에러 처리가 돼야합니다.", () => {
