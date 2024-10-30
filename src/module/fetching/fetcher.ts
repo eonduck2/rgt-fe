@@ -1,3 +1,4 @@
+import { failedFetchMessage } from "@/static/module/fetching/fetcher.static";
 import thrower from "../throw/thrower";
 
 /**
@@ -16,7 +17,7 @@ export default async (
   const response = await fetch(url, { ...options });
 
   if (!response.ok) {
-    thrower(url + " 요청이 실패했습니다.");
+    thrower(url + failedFetchMessage);
   }
 
   return response;
