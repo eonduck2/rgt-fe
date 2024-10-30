@@ -31,7 +31,7 @@ describe("urlJoiner 모듈에 대한 테스트 케이스 집합입니다.", () =
       "https://test.com/",
       "testPath/testPath2/testPath3/"
     );
-    expect(result).toBe("https://test.com/testPath/testPath2/testPath3");
+    expect(result).toBe("https://test.com/testPath/testPath2/testPath3/");
   });
 
   it("빈 문자열을 포함하여 경로를 조합합니다.", () => {
