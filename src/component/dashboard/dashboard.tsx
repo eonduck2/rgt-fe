@@ -1,40 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { Home, Search } from "lucide-react";
-
-interface Order {
-  order_id: number;
-  item: string;
-  quantity: number;
-  status: OrderStatus;
-  timestamp: string;
-}
-
-type OrderStatus = "접수됨" | "처리중" | "완료";
-type SortDirection = "asc" | "desc";
-type SortField = "order_id" | "status";
-
-interface WebSocketMessage {
-  type: "orders_list" | "new_order" | "status_update";
-  orders?: Order[];
-  order?: Order;
-  order_id?: number;
-  status?: OrderStatus;
-}
+import type TSortField from "@/types/component/dashboard/sort/sortField.type";
+import type TOrder from "@/types/component/dashboard/order/order.type";
+import type TSortDirection from "@/types/component/dashboard/sort/sortDirection.type";
+import type TWebSocketMessage from "@/types/webSocket/webSocketMessage.type";
+import type TOrderStatus from "@/types/component/dashboard/order/orderStatus.type";
+import urlJoiner from "@/module/url/urlJoiner";
+import type { NextPage } from "next";
+import orderTypeSwitcher from "@/module/utils/orderTypeSwitcher";
+import getOrderStatus from "@/module/getter/getOrderStatus";
+import timeFormatter from "@/module/format/timeFormatter";
+import getNextStatus from "@/module/getter/getNextStatus";
+import getStatusWeight from "@/module/getter/getStatusWeight";
+import HomeButton from "../button/homeButton";
+import SearchBar from "../input/search/searchBar";
+import DashboardHeader from "../header/dashboardHeader";
 
 const OrderDashboard: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<TOrder[]>([]);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{
-    field: SortField;
-    direction: SortDirection;
+    field: TSortField;
+    direction: TSortDirection;
   }>({
     field: "order_id",
     direction: "asc",
   });
+  const WS_URL = process.env.NEXT_PUBLIC_WS_URL as string;
+  const EP_WS = process.env.NEXT_PUBLIC_EP_WS as string;
 
   useEffect(() => {
-    const websocket = new WebSocket("ws://localhost:8000/ws");
+    const websocket = new WebSocket(urlJoiner(WS_URL, EP_WS));
 
     websocket.onopen = () => {
       console.log("웹소켓 연결됨");
@@ -42,35 +38,9 @@ const OrderDashboard: React.FC = () => {
     };
 
     websocket.onmessage = (event: MessageEvent) => {
-      const data: WebSocketMessage = JSON.parse(event.data);
+      const data: TWebSocketMessage = JSON.parse(event.data);
 
-      switch (data.type) {
-        case "orders_list":
-          if (data.orders) {
-            setOrders(data.orders);
-          }
-          break;
-        case "new_order":
-          if (data.order) {
-            setOrders((prev) => [...prev, data.order!]);
-          }
-          break;
-        case "status_update":
-          if (data.order_id && data.status) {
-            setOrders((prev) =>
-              prev.map((order) => {
-                if (order.order_id === data.order_id) {
-                  return {
-                    ...order,
-                    status: data.status as OrderStatus,
-                  };
-                }
-                return order;
-              })
-            );
-          }
-          break;
-      }
+      orderTypeSwitcher(data, setOrders);
     };
 
     websocket.onclose = () => {
@@ -83,45 +53,7 @@ const OrderDashboard: React.FC = () => {
     };
   }, []);
 
-  const handleHomeClick = () => {
-    window.location.href = "/";
-  };
-
-  const getStatusClass = (status: OrderStatus): string => {
-    switch (status) {
-      case "접수됨":
-        return "bg-blue-100 text-blue-800";
-      case "처리중":
-        return "bg-yellow-100 text-yellow-800";
-      case "완료":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  };
-
-  const formatTime = (timestamp: string): string => {
-    const date = new Date(timestamp);
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-    return `${hours}:${minutes}:${seconds}`;
-  };
-
-  const getNextStatus = (currentStatus: OrderStatus): OrderStatus => {
-    switch (currentStatus) {
-      case "접수됨":
-        return "처리중";
-      case "처리중":
-        return "완료";
-      case "완료":
-        return "완료";
-      default:
-        return currentStatus;
-    }
-  };
-
-  const handleStatusChange = (orderId: number, currentStatus: OrderStatus) => {
+  const handleStatusChange = (orderId: number, currentStatus: TOrderStatus) => {
     const nextStatus = getNextStatus(currentStatus);
 
     if (ws && ws.readyState === WebSocket.OPEN && currentStatus !== "완료") {
@@ -141,31 +73,6 @@ const OrderDashboard: React.FC = () => {
     }
   };
 
-  const handleSort = (field: SortField) => {
-    setSortConfig((prev) => ({
-      field,
-      direction:
-        prev.field === field
-          ? prev.direction === "asc"
-            ? "desc"
-            : "asc"
-          : "asc",
-    }));
-  };
-
-  const getStatusWeight = (status: OrderStatus): number => {
-    switch (status) {
-      case "접수됨":
-        return 1;
-      case "처리중":
-        return 2;
-      case "완료":
-        return 3;
-      default:
-        return 0;
-    }
-  };
-
   const filteredOrders = orders.filter((order) =>
     order.item.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -181,33 +88,12 @@ const OrderDashboard: React.FC = () => {
     }
   });
 
-  const getSortIcon = (field: SortField) => {
-    if (sortConfig.field !== field) return "↕";
-    return sortConfig.direction === "asc" ? "↑" : "↓";
-  };
-
   return (
     <div className="w-full h-full flex flex-col bg-white rounded-lg shadow-lg">
       <div className="flex-none p-4 sm:p-6 md:p-8 lg:p-10">
         <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={handleHomeClick}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-150"
-          >
-            <Home className="w-6 h-6 text-gray-600" />
-          </button>
-          <div className="relative flex-1 max-w-md mx-4">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="메뉴 검색..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            />
-          </div>
+          <HomeButton />
+          <SearchBar value={searchTerm} setter={setSearchTerm} />
         </div>
 
         <header className="mb-4 sm:mb-6 md:mb-8 lg:mb-10">
@@ -220,24 +106,10 @@ const OrderDashboard: React.FC = () => {
         </header>
 
         <div className="grid grid-cols-6 gap-4 sm:gap-6 font-bold bg-gray-50 p-4 sm:p-6 rounded-lg text-base sm:text-lg">
-          <div
-            className="text-gray-700 cursor-pointer flex items-center gap-2"
-            onClick={() => handleSort("order_id")}
-          >
-            주문번호
-            <span className="text-gray-500">{getSortIcon("order_id")}</span>
-          </div>
-          <div className="text-gray-700">메뉴</div>
-          <div className="text-gray-700">수량</div>
-          <div
-            className="text-gray-700 cursor-pointer flex items-center gap-2"
-            onClick={() => handleSort("status")}
-          >
-            상태
-            <span className="text-gray-500">{getSortIcon("status")}</span>
-          </div>
-          <div className="text-gray-700">시간</div>
-          <div className="text-gray-700">상태 변경</div>
+          <DashboardHeader
+            sortConfig={sortConfig}
+            setSortConfig={setSortConfig}
+          />
         </div>
       </div>
 
@@ -260,7 +132,7 @@ const OrderDashboard: React.FC = () => {
                 </div>
                 <div>
                   <span
-                    className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-sm sm:text-base font-medium ${getStatusClass(
+                    className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-sm sm:text-base font-medium ${getOrderStatus(
                       order.status
                     )}`}
                   >
@@ -268,7 +140,7 @@ const OrderDashboard: React.FC = () => {
                   </span>
                 </div>
                 <div className="text-gray-600 text-sm sm:text-base md:text-lg">
-                  {formatTime(order.timestamp)}
+                  {timeFormatter(order.timestamp)}
                 </div>
                 <div>
                   {order.status !== "완료" && (
@@ -302,7 +174,7 @@ const OrderDashboard: React.FC = () => {
   );
 };
 
-const OrderPage: React.FC = () => {
+const OrderPage: NextPage = () => {
   return (
     <div className="w-screen h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="w-full h-full md:w-11/12 md:h-5/6 lg:w-10/12 xl:w-10/12 2xl:w-9/12">
