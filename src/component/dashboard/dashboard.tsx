@@ -19,6 +19,10 @@ import HttpMethod from "@/static/shared/http/httpMethod.static";
 import thrower from "@/module/throw/thrower";
 import mime from "mime";
 
+/**
+ * @eonduck2 24.10.31
+ * @description주문 현황을 실시간으로 표시하고, 웹소켓을 통해 주문 정보를 업데이트합니다.
+ */
 const OrderDashboard: React.FC = () => {
   const [orders, setOrders] = useState<TOrder[]>([]);
   const [ws, setWs] = useState<WebSocket | null>(null);
@@ -59,6 +63,13 @@ const OrderDashboard: React.FC = () => {
     };
   }, []);
 
+  /**
+   * @eonduck2 24.10.31
+   * @description 주문 상태 변경 핸들러
+   * @param { number } orderId - 주문 ID
+   * @param { TOrderStatus } currentStatus - 현재 주문 상태
+   * @returns { Promise<void> }
+   */
   const handleStatusChange = async (
     orderId: number,
     currentStatus: TOrderStatus
