@@ -9,7 +9,6 @@ import HttpMethod from "@/static/shared/http/httpMethod.static";
 import urlJoiner from "@/module/url/urlJoiner";
 import { LayoutGrid } from "lucide-react";
 import OrderStateModal from "../modal/orderStateModal";
-import { forwardSlash } from "@/static/shared/symbol/symbol.static";
 
 /**
  * @eonduck2 24.10.31
@@ -24,7 +23,6 @@ export default () => {
   const [confirmationMessage, setConfirmationMessage] = useState("");
   const BE_URL = process.env.NEXT_PUBLIC_BE_URL as string;
   const EP_ORDER = process.env.NEXT_PUBLIC_EP_ORDER as string;
-  const EP_DASHBOARD = process.env.NEXT_PUBLIC_EP_DASHBOARD as string;
 
   const memoizedFoodName = useMemo(() => foodName, [foodName]);
 
@@ -66,7 +64,7 @@ export default () => {
    *
    */
   const toDashboard = () => {
-    router.push(urlJoiner(forwardSlash, EP_DASHBOARD));
+    router.push("/dashboard");
   };
 
   return (
