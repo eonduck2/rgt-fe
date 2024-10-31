@@ -10,7 +10,6 @@ import urlJoiner from "@/module/url/urlJoiner";
 import { LayoutGrid } from "lucide-react";
 import OrderStateModal from "../modal/orderStateModal";
 import { forwardSlash } from "@/static/shared/symbol/symbol.static";
-import routePusher from "@/module/routing/routePusher";
 
 /**
  * @eonduck2 24.10.31
