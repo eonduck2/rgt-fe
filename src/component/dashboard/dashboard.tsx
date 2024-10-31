@@ -21,7 +21,7 @@ import mime from "mime";
 
 /**
  * @eonduck2 24.10.31
- * @description주문 현황을 실시간으로 표시하고, 웹소켓을 통해 주문 정보를 업데이트합니다.
+ * @description 주문 현황을 실시간으로 표시하고, 웹소켓을 통해 주문 정보를 업데이트합니다.
  */
 const OrderDashboard: React.FC = () => {
   const [orders, setOrders] = useState<TOrder[]>([]);
