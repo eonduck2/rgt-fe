@@ -3,7 +3,7 @@ import thrower from "../throw/thrower";
 
 /**
  * @eonduck2 24.10.29
- * @description fetch 요청을 보내는 함수입니다. 응답에 실패할 시 Error 객체가 전달됩니다.
+ * @description fetch 요청을 보내는 함수입니다. 응답에 실패할 시 Error 페이지로 이동합니다.
  *
  * @param { string } url 요청을 보낼 url
  * @param { RequestInit } [options] Method나 header, body 같은 추가적인 요청 옵션
@@ -17,6 +17,7 @@ export default async (
   const response = await fetch(url, { ...options });
 
   if (!response.ok) {
+    window.location.href = "/error";
     thrower(url + failedFetchMessage);
   }
 
