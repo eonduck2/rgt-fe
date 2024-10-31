@@ -4,8 +4,8 @@ import type TOrder from "@/types/component/dashboard/order/order.type";
 import type TSortDirection from "@/types/component/dashboard/sort/sortDirection.type";
 import type TWebSocketMessage from "@/types/webSocket/webSocketMessage.type";
 import type TOrderStatus from "@/types/component/dashboard/order/orderStatus.type";
-import urlJoiner from "@/module/url/urlJoiner";
 import type { NextPage } from "next";
+import urlJoiner from "@/module/url/urlJoiner";
 import orderTypeSwitcher from "@/module/utils/orderTypeSwitcher";
 import getOrderStatus from "@/module/getter/getOrderStatus";
 import timeFormatter from "@/module/format/timeFormatter";
@@ -14,6 +14,10 @@ import getStatusWeight from "@/module/getter/getStatusWeight";
 import HomeButton from "../button/homeButton";
 import SearchBar from "../input/search/searchBar";
 import DashboardHeader from "../header/dashboardHeader";
+import fetcher from "@/module/fetching/fetcher";
+import HttpMethod from "@/static/shared/http/httpMethod.static";
+import thrower from "@/module/throw/thrower";
+import mime from "mime";
 
 const OrderDashboard: React.FC = () => {
   const [orders, setOrders] = useState<TOrder[]>([]);
@@ -26,8 +30,11 @@ const OrderDashboard: React.FC = () => {
     field: "order_id",
     direction: "asc",
   });
+  const BE_URL = process.env.NEXT_PUBLIC_BE_URL as string;
   const WS_URL = process.env.NEXT_PUBLIC_WS_URL as string;
   const EP_WS = process.env.NEXT_PUBLIC_EP_WS as string;
+  const EP_ORDER = process.env.NEXT_PUBLIC_EP_ORDER as string;
+  const EP_STATUS = process.env.NEXT_PUBLIC_EP_STATUS as string;
 
   useEffect(() => {
     const websocket = new WebSocket(urlJoiner(WS_URL, EP_WS));
@@ -39,7 +46,6 @@ const OrderDashboard: React.FC = () => {
 
     websocket.onmessage = (event: MessageEvent) => {
       const data: TWebSocketMessage = JSON.parse(event.data);
-
       orderTypeSwitcher(data, setOrders);
     };
 
@@ -53,23 +59,24 @@ const OrderDashboard: React.FC = () => {
     };
   }, []);
 
-  const handleStatusChange = (orderId: number, currentStatus: TOrderStatus) => {
+  const handleStatusChange = async (
+    orderId: number,
+    currentStatus: TOrderStatus
+  ) => {
     const nextStatus = getNextStatus(currentStatus);
 
-    if (ws && ws.readyState === WebSocket.OPEN && currentStatus !== "완료") {
-      ws.send(
-        JSON.stringify({
-          type: "status_update",
-          order_id: orderId,
-          status: nextStatus,
-        })
-      );
-
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.order_id === orderId ? { ...order, status: nextStatus } : order
-        )
-      );
+    if (currentStatus !== "완료") {
+      try {
+        await fetcher(urlJoiner(BE_URL, EP_ORDER, String(orderId), EP_STATUS), {
+          method: HttpMethod.PUT,
+          headers: {
+            "Content-Type": mime.getType("json") as string,
+          },
+          body: JSON.stringify({ status: nextStatus }),
+        });
+      } catch (error) {
+        thrower(error as Error);
+      }
     }
   };
 
@@ -153,7 +160,6 @@ const OrderDashboard: React.FC = () => {
                           ? "bg-blue-500 text-white hover:bg-blue-600"
                           : "bg-green-500 text-white hover:bg-green-600"
                       } transition-colors duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed`}
-                      disabled={!ws || ws.readyState !== WebSocket.OPEN}
                     >
                       {order.status === "접수됨" ? "조리 시작" : "완료 처리"}
                     </button>
