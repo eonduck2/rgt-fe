@@ -3,7 +3,7 @@ import TOrderStateModalProps from "@/types/component/modal/orderStateModalProps.
 import React from "react";
 
 /**
- * @function OrderStateModal
+ * @eonduck2 24.10.31
  * @description 주문 상태를 알려주는 모달창
  * @param { TOrderStateModalProps } props 메시지와 onClose 함수를 포함한 모달 속성
  * @returns { React.FC } React 함수형 컴포넌트
