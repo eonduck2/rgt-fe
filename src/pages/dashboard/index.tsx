@@ -1,6 +1,6 @@
-import OrderPage from "@/component/dashboard/dashboard";
+import OrderDashboard from "@/component/dashboard/dashboard";
 
 export default () => {
-  return <OrderPage />;
+  return <OrderDashboard />;
 };
 
